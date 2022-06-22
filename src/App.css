@@ -1,0 +1,12 @@
+a {
+  text-decoration: none;
+}
+
+body {
+  background-color: #E7EBF0;
+}
+
+.card__item {
+  color: white;
+  text-decoration: none;
+}
