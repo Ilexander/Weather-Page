@@ -24,6 +24,7 @@ export interface IWeatherRequest {
 }
 
 interface WeatherSlice {
+  refresh: IWeatherRequest;
   currentRequest: IWeatherRequest;
   list: IWeatherRequest[];
   status: string;
@@ -31,6 +32,28 @@ interface WeatherSlice {
 }
 
 const initialState: WeatherSlice = {
+  refresh: {
+    name: "",
+    weather: [
+      {
+        icon: "",
+        main: "",
+      },
+    ],
+    wind: {
+      speed: 0,
+      gust: 0,
+    },
+    sys: {
+      country: "UA",
+      sunset: 0,
+      sunrise: 0,
+    },
+    main: {
+      feels_like: 273,
+      temp: 273,
+    },
+  },
   currentRequest: {
     name: "Find city",
     weather: [
@@ -74,7 +97,22 @@ export const fetchCurrentCity = createAsyncThunk(
     } catch {}
   }
 );
-
+export const fetchRefresh = createAsyncThunk(
+  "weather/fetchRefresh",
+  async (getName: string) => {
+    try {
+      const responsive = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${getName}&appid=18a893d2564c6fb5e727e32444e879fe`
+      );
+      const data = await responsive.json();
+      if (responsive.status === 404) {
+        initialState.status = "rejected";
+      } else {
+        return data;
+      }
+    } catch {}
+  }
+);
 export const fetchToList = createAsyncThunk(
   "weather/fetchToList",
   async (getName: string) => {
@@ -112,6 +150,9 @@ export const weatherListSlice = createSlice({
     rebootList(state) {
       state.list = [];
     },
+    refreshItem(state, action) {
+      state.list[action.payload] = state.refresh;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchCurrentCity.fulfilled, (state, action) => {
@@ -125,7 +166,7 @@ export const weatherListSlice = createSlice({
     });
     builder.addCase(fetchToList.fulfilled, (state, action) => {
       if (!action.payload) {
-        state.status = 'rejected'
+        state.status = "rejected";
       } else {
         state.status = "fulfilled";
         state.list.forEach((item) => {
@@ -138,9 +179,13 @@ export const weatherListSlice = createSlice({
         state.list = state.list.concat(action.payload);
       }
     });
+    builder.addCase(fetchRefresh.fulfilled, (state, action) => {
+      state.refresh = action.payload;
+    });
   },
 });
 
-export const { removeItem, rebootList, addToList } = weatherListSlice.actions;
+export const { removeItem, rebootList, addToList, refreshItem } =
+  weatherListSlice.actions;
 
 export default weatherListSlice.reducer;

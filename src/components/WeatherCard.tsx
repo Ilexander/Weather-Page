@@ -8,10 +8,15 @@ import {
 import { Box } from "@mui/system";
 import { NavLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchToList, removeItem } from "../store/weatherListSlice";
+import {
+  fetchRefresh,
+  refreshItem,
+  removeItem,
+} from "../store/weatherListSlice";
 
 interface IProps {
   title: string;
+  index: number;
   info: string;
   temp: string | number;
   img: string;
@@ -20,7 +25,8 @@ interface IProps {
 const WeatherCard: React.FC<IProps> = (props) => {
   const storage: any = localStorage.getItem("list");
   const dispatch = useAppDispatch();
-  const {status} = useAppSelector(state => state.weatherList)
+  const { status } = useAppSelector((state) => state.weatherList);
+
   const removeRequest = (name: string) => {
     const store = JSON.parse(storage || "[]");
     const newStore = store.filter((item: string) => {
@@ -31,13 +37,15 @@ const WeatherCard: React.FC<IProps> = (props) => {
   };
 
   const refresh = (name: string) => {
-    dispatch(fetchToList(name));
-    dispatch(removeItem(name));
+    dispatch(fetchRefresh(name));
+    setTimeout(() => {
+      dispatch(refreshItem(props.index));
+    }, 1000);
   };
 
   return (
     <Card sx={{ maxWidth: 345, width: "100%" }} variant="outlined">
-      {status === 'rejected' ? <Typography variant="h5">Error</Typography> : ''}
+      {status === "rejected" ? <Typography variant="h5">Error</Typography> : ""}
       <CardActions>
         <Button variant="outlined" onClick={() => refresh(props.title)}>
           Refresh

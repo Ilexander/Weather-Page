@@ -34,6 +34,7 @@ const WeatherList: React.FC<{}> = () => {
           <Grid item xs={3} key={index}>
             <WeatherCard
               title={item?.name}
+              index={index}
               info={item?.weather[0].main}
               temp={(item?.main.temp - 273).toFixed(1)}
               img={item?.weather[0].icon}
